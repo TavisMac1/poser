@@ -45,20 +45,40 @@ public class ImplPose : MonoBehaviour
             var legIndicies = new List<int>();
 
             var count = new int();
-            foreach (var character in name)
+            for (var i = 0; i < name.Count(); i++)
             {
                 if (count == 3) break;
-                if (character == 'l') count++;
-                if (count == 1 && character == 'e') 
+                if (name[i] == 'l')
+                {
+                    count++;
+                    legIndicies.Add(i);
+                } 
+                if (count == 1 && name[i] == 'e')
+                {
+                  count++;
+                  legIndicies.Add(i);      
+                } 
+                if (count == 2 && name[i] == 'g')
+                {
+                    count++;
+                    legIndicies.Add(i);
+                    break;
+                }
             }
 
-            var isLeft = name.Contains("left") || name.Contains("l_");
+            if (legIndicies.Count != 3) return;
 
-            if ()
-            {
-                SetLegPose
-                return;
-            }
+            for (var i = 0; i < legIndicies.Count; i++) name = name.RemoveAt(i); 
+
+            var isLeft = name.Contains("left") || name.Contains("l_") || name.Contains("l");
+
+            var isRight = false;
+            if (!isLeft) isRight = name.Contains("right") || name.Contains("r_") || name.Contains("r");
+
+            if (!isRight) return;
+
+            if (isRight) SetLegPose("", _rightLegRotation);
+            else SetLegPose("", _leftLegRotation);
         }
 
         SetArmPose(LeftArm, new Vector3(0, 0, 90));
