@@ -71,7 +71,6 @@ public class ImplPose : MonoBehaviour
             if (count == 2)
                 if (n.Equals(legArr[2]) || n.Equals(armArr[2]))
                 {
-                    count++;
                     boneIndicies.Add(i);
                     break;
                 }
