@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
+[ExecuteInEditMode]
 public class ImplPose : MonoBehaviour
 {
     [SerializeField]
@@ -25,7 +26,7 @@ public class ImplPose : MonoBehaviour
 
     private void Start() => Initialize();
 
-    private void Initialize()
+    public void Initialize()
     {
         _bones.ForEach((bone) =>
         {
@@ -38,13 +39,13 @@ public class ImplPose : MonoBehaviour
         Transform boneName
      )
     {
-        var name = transform.name.ToLower();
+        var name = boneName.name.ToLower();
         name = name.Trim();
 
         var isLeg = name.Contains("leg");
         var isArm = name.Contains("arm");
 
-        if (!isLeg & !isLeg) return;
+        if (!isLeg & !isArm) return;
 
         var boneIndicies = new List<int>();
 
