@@ -1,7 +1,7 @@
-using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public class ImplPose : MonoBehaviour
 {
@@ -23,69 +23,79 @@ public class ImplPose : MonoBehaviour
     private readonly Vector3 _leftLegRotation = Vector3.zero;
     private readonly Vector3 _rightLegRotation = Vector3.zero;
 
+    private void Start() => Initialize();
+
     private void Initialize()
     {
         _bones.ForEach((bone) =>
         {
-            SetTPose(bone);
+            SetBone(bone);
         });
     }
 
-    private void SetTPose(Transform transform)
+    private void SetBone
+    (
+        Transform boneName
+     )
     {
         var name = transform.name.ToLower();
         name = name.Trim();
 
-        void isLegBone()
+        var isLeg = name.Contains("leg");
+        var isArm = name.Contains("arm");
+
+        if (!isLeg & !isLeg) return;
+
+        var boneIndicies = new List<int>();
+
+        char[] legArr = new char[] {'l', 'e', 'g'};
+        char[] armArr = new char[] { 'a', 'r', 'm' };
+
+        var count = new int();
+        for (var i = 0; i < name.Count(); i++)
         {
-            var isLeg = name.Contains("leg");
+            var n = name[i];
+            if (count == 3) break;
 
-            if (!isLeg) return;
-
-            var legIndicies = new List<int>();
-
-            var count = new int();
-            for (var i = 0; i < name.Count(); i++)
+            if (n.Equals(legArr[0]) || n.Equals(armArr[0]))
             {
-                if (count == 3) break;
-                if (name[i] == 'l')
+                count++;
+                boneIndicies.Add(i);
+            }
+            if (count == 1)
+                if (n.Equals(legArr[1]) || n.Equals(armArr[1]))
                 {
                     count++;
-                    legIndicies.Add(i);
-                } 
-                if (count == 1 && name[i] == 'e')
-                {
-                  count++;
-                  legIndicies.Add(i);      
-                } 
-                if (count == 2 && name[i] == 'g')
+                    boneIndicies.Add(i);
+                }
+            if (count == 2)
+                if (n.Equals(legArr[2]) || n.Equals(armArr[2]))
                 {
                     count++;
-                    legIndicies.Add(i);
+                    boneIndicies.Add(i);
                     break;
                 }
-            }
-
-            if (legIndicies.Count != 3) return;
-
-            for (var i = 0; i < legIndicies.Count; i++) name = name.RemoveAt(i); 
-
-            var isLeft = name.Contains("left") || name.Contains("l_") || name.Contains("l");
-
-            var isRight = false;
-            if (!isLeft) isRight = name.Contains("right") || name.Contains("r_") || name.Contains("r");
-
-            if (!isRight) return;
-
-            if (isRight) SetLegPose("", _rightLegRotation);
-            else SetLegPose("", _leftLegRotation);
         }
 
-        SetArmPose(LeftArm, new Vector3(0, 0, 90));
-        SetArmPose(RightArm, new Vector3(0, 0, -90));
-        // Legs remain straight in T-pose
-        SetLegPose(LeftLeg, Vector3.zero);
-        SetLegPose(RightLeg, Vector3.zero);
+        if (boneIndicies.Count != 3) return;
+
+        for (var i = 0; i < boneIndicies.Count; i++) name.Remove(boneIndicies[i]);
+
+        name = RemoveSpecChar(name);
+
+        var isLeft = name.Contains("left") || name.Contains("l");
+
+        var isRight = false;
+        if (!isLeft) isRight = name.Contains("right") || name.Contains("r");
+
+        if (!isRight) return;
+
+        if (isArm)
+            if (isRight) SetArmPose(boneName.name, _rightArmRotation);
+            else SetArmPose("", _leftArmRotation);
+        if (isLeg)
+            if (isRight) SetLegPose(boneName.name, _rightLegRotation);
+            else SetLegPose("", _leftLegRotation);
     }
 
     private void SetArmPose
@@ -107,4 +117,6 @@ public class ImplPose : MonoBehaviour
         var leg = _rigMasterObject.transform.Find(legName);
         if (leg is not null) leg.localRotation = Quaternion.Euler(eulerAngles);
     }
+
+    private string RemoveSpecChar(string input) => Regex.Replace(input, "[^a-zA-Z0-9]", string.Empty);
 }
